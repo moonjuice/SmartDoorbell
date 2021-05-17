@@ -73,8 +73,8 @@ if ("both" == role || "client" == role) {
     var Gpio = require("onoff").Gpio;
     var pushButton = new Gpio(pinNum, "in", "both");
     var mqtt = require("mqtt");
-    var client = mqtt.connect("mqtt://moonjuice.myqnapcloud.com", {
-        port: 11883,
+    var client = mqtt.connect("mqtt://" + host, {
+        port: portNum,
     });
     client.on("connect", function () {
         console.log("connected");
