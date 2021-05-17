@@ -1,20 +1,89 @@
-var Gpio = require('onoff').Gpio; //include onoff to interact with the GPIO
-//var LED = new Gpio(4, 'out'); //use GPIO pin 4 as output
-var pushButton = new Gpio(22, 'in', 'both'); //use GPIO pin 17 as input, and 'both' button presses, and releases should be handled
+const role = process.env.ROLE || "client";
+const pinNum = process.env.PIN || 22;
+const portNum = process.env.PORT || 1883;
+const host = process.env.HOST || "localhost";
 
-pushButton.watch(function (err, value) { //Watch for hardware interrupts on pushButton GPIO, specify callback function
-  if (err) { //if an error
-    console.error('There was an error', err); //output error message to console
-  return;
-  }
-  console.log('button value:' + value);
-  //LED.writeSync(value); //turn LED on or off depending on the button state (0 or 1)
-});
+if ("both" == role || "server" == role) {
+    const aedes = require("aedes")();
+    const { createServer } = require("aedes-server-factory");
 
-function unexportOnClose() { //function to run when exiting program
-  //LED.writeSync(0); // Turn LED off
-  //LED.unexport(); // Unexport LED GPIO to free resources
-  pushButton.unexport(); // Unexport Button GPIO to free resources
-};
+    aedes.on("subscribe", function (subscriptions, client) {
+        console.log(
+            "MQTT client \x1b[32m" +
+                (client ? client.id : client) +
+                "\x1b[0m subscribed to topics: " +
+                subscriptions.map((s) => s.topic).join("\n"),
+            "from broker",
+            aedes.id
+        );
+    });
 
-process.on('SIGINT', unexportOnClose); //function to run when user closes using ctrl+c
+    aedes.on("unsubscribe", function (subscriptions, client) {
+        console.log(
+            "MQTT client \x1b[32m" +
+                (client ? client.id : client) +
+                "\x1b[0m unsubscribed to topics: " +
+                subscriptions.join("\n"),
+            "from broker",
+            aedes.id
+        );
+    });
+
+    aedes.on("client", function (client) {
+        console.log(
+            "Client Connected: \x1b[33m" +
+                (client ? client.id : client) +
+                "\x1b[0m",
+            "to broker",
+            aedes.id
+        );
+    });
+
+    aedes.on("clientDisconnect", function (client) {
+        console.log(
+            "Client Disconnected: \x1b[31m" +
+                (client ? client.id : client) +
+                "\x1b[0m",
+            "to broker",
+            aedes.id
+        );
+    });
+
+    aedes.on("publish", async function (packet, client) {
+        console.log(
+            "Client \x1b[31m" +
+                (client ? client.id : "BROKER_" + aedes.id) +
+                "\x1b[0m has published",
+            packet.payload.toString(),
+            "on",
+            packet.topic,
+            "to broker",
+            aedes.id
+        );
+    });
+
+    const httpServer = createServer(aedes);
+
+    httpServer.listen(portNum, function () {
+        console.log("server listening on port ", portNum);
+    });
+}
+
+if ("both" == role || "client" == role) {
+    var Gpio = require("onoff").Gpio;
+    var pushButton = new Gpio(pinNum, "in", "both");
+    var mqtt = require("mqtt");
+    var client = mqtt.connect("mqtt://" + host);
+    client.on("connect", function () {
+        console.log("connected");
+    });
+
+    pushButton.watch(function (err, value) {
+        if (err) {
+            console.error("There was an error", err);
+            return;
+        }
+        console.log("button value:" + value);
+        client.publish("btn", value.toString());
+    });
+}
