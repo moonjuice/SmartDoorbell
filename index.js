@@ -78,6 +78,8 @@ if ("both" == role || "client" == role) {
     });
     client.on("connect", function () {
         console.log("connected");
+        client.publish("homeassistant/binary_sensor/smart_doorbell/config"
+            , '{"name":"smart_doorbell", "device_class":"door", "state_topic":"homeassistant/binary_sensor/smart_doorbell/state"}');
     });
 
     pushButton.watch(function (err, value) {
@@ -86,6 +88,6 @@ if ("both" == role || "client" == role) {
             return;
         }
         console.log("button value:" + value);
-        client.publish("btn", value.toString());
+        client.publish("homeassistant/binary_sensor/smart_doorbell/state", (value==1?"ON":"OFF"));
     });
 }
