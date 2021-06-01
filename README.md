@@ -1,11 +1,5 @@
 # SmartDoorbell
 
-## Local Test
-
-```
-sudo docker run -it --rm --privileged --name smart-doorbell -v "$PWD":/usr/src/app -w /usr/src/app -e ROLE=both -p 1883:1883 node:14 /bin/bash -c "npm install && npm start"
-```
-
 ## Default Parameters
 
 | Name | Value     |
@@ -14,6 +8,29 @@ sudo docker run -it --rm --privileged --name smart-doorbell -v "$PWD":/usr/src/a
 | PIN  | 22        |
 | PORT | 1883      |
 | HOST | localhost |
+
+## Create .env file in shared directory
+including these information:
+```
+ROLE=client
+PIN=22
+PORT=1883
+HOST=localhost
+```
+## Local Test
+
+```
+sudo docker run -it --rm --privileged --name smart-doorbell -v "$PWD":/usr/src/app -w /usr/src/app --env-file .env node:14 /bin/bash -c "npm install && npm start"
+```
+
+## Build Docker Image and Run
+
+```
+// build image
+$ sudo docker build . -t smart-doorbell
+// run docker image
+$ sudo docker run --rm --privileged --env-file .env --name dev smart-doorbell:latest
+```
 
 ## Subscriber Sample
 
