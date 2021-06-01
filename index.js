@@ -76,6 +76,7 @@ if ("both" == role || "client" == role) {
     var client = mqtt.connect("mqtt://" + host, {
         port: portNum,
     });
+    var btnState = 0;
     client.on("connect", function () {
         console.log("connected");
         client.publish("homeassistant/binary_sensor/smart_doorbell/config"
@@ -88,6 +89,26 @@ if ("both" == role || "client" == role) {
             return;
         }
         console.log("button value:" + value);
-        client.publish("homeassistant/binary_sensor/smart_doorbell/state", (value==1?"ON":"OFF"));
+        if (value != btnState) {
+            client.publish("homeassistant/binary_sensor/smart_doorbell/state", (value==1?"ON":"OFF"));
+            btnState = value;
+        }
     });
 }
+
+// for camera
+const { Resolver } = require('dns').promises;
+const resolver = new Resolver();
+const { exec } = require('child_process');
+const pathToFfmpeg = require('ffmpeg-static');
+resolver.resolve4(host).then((addresses) => {
+    const script = pathToFfmpeg + " -ar 44100 -ac 2 -acodec pcm_s16le -f s16le -ac 2 -i /dev/zero -f v4l2 -codec:v h264 -framerate 60 -video_size 1280x720 -i /dev/video0 -codec:v copy -f flv rtmp://" + addresses + ":1935/live/STREAM_NAME";
+    exec(script, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
+          return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
+    });
+});

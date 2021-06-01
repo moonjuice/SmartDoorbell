@@ -7,7 +7,9 @@ RUN apk --no-cache add --virtual native-deps \
   npm install --quiet node-gyp -g &&\
   npm install --quiet && \
   apk del native-deps
+RUN apk add bash
 COPY ./*.js ./
 EXPOSE 1883
+EXPOSE 1935
 RUN mkdir data
 CMD ["npm", "start"]
