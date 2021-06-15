@@ -1,5 +1,5 @@
 const role = process.env.ROLE || "client";
-const pinNum = process.env.PIN || 22;
+const pinNum = process.env.PIN || 27;
 const portNum = process.env.PORT || 1883;
 const host = process.env.HOST || "localhost";
 
