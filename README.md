@@ -5,7 +5,7 @@
 | Name | Value     |
 | ---- | --------- |
 | ROLE | client    |
-| PIN  | 22        |
+| PIN  | 27        |
 | PORT | 1883      |
 | HOST | localhost |
 
@@ -46,3 +46,8 @@ client.on("message", function (topic, message) {
     console.log("Message Received:", context);
 });
 ```
+
+## HomeAssistant auto create entity
+1. 設定 -> 整合 -> Mosquitto broker -> 設定
+2. 訂閱主題輸入 homeassistant/binary_sensor/smart_doorbell/config，然後開始訂閱
+3. client 連上後就會自動新增 entity

@@ -101,8 +101,9 @@ const { Resolver } = require('dns').promises;
 const resolver = new Resolver();
 const { exec } = require('child_process');
 const pathToFfmpeg = require('ffmpeg-static');
-resolver.resolve4(host).then((addresses) => {
-    const script = pathToFfmpeg + " -ar 44100 -ac 2 -acodec pcm_s16le -f s16le -ac 2 -i /dev/zero -f v4l2 -codec:v h264 -framerate 60 -video_size 1280x720 -i /dev/video0 -codec:v copy -f flv rtmp://" + addresses + ":1935/live/STREAM_NAME";
+//resolver.resolve4(host).then((addresses) => {
+    const script = pathToFfmpeg + " -ar 44100 -ac 2 -acodec pcm_s16le -f s16le -ac 2 -i /dev/zero -f v4l2 -codec:v h264 -framerate 60 -video_size 1280x720"
+                       + " -i /dev/video0 -codec:v copy -f flv rtmp://" + host + ":1935/live/STREAM_NAME";
     exec(script, (error, stdout, stderr) => {
         if (error) {
           console.error(`exec error: ${error}`);
@@ -111,4 +112,4 @@ resolver.resolve4(host).then((addresses) => {
         console.log(`stdout: ${stdout}`);
         console.error(`stderr: ${stderr}`);
     });
-});
+//});
